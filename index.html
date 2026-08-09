@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Castle Conversion Battle</title>
+<style>
+:root{
+  --purple:#8a72d0;
+  --purple-deep:#694fb4;
+  --purple-light:#f6f2ff;
+  --ink:#2d2744;
+  --good:#1e9a56;
+  --bad:#c84848;
+  --p1:#4c91eb;
+  --p1bg:#edf5ff;
+  --p2:#f39a3b;
+  --p2bg:#fff3e8;
+  --stone:#d8ccf6;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;height:100%;overflow:hidden;
+  font-family:"Trebuchet MS","Arial Rounded MT Bold",Arial,sans-serif;
+  background:linear-gradient(#f5f1ff,#fff);color:var(--ink);
+}
+button,input{font:inherit}
+button{cursor:pointer;touch-action:manipulation}
+body{padding:8px}
+.app{
+  width:min(1280px,100%);
+  height:calc(100vh - 16px);
+  margin:auto;
+  display:flex;flex-direction:column;
+  background:#fff;border:2px solid #e1d8f7;border-radius:24px;
+  overflow:hidden;box-shadow:0 12px 32px #7b64bc22;
+}
+header{
+  flex:0 0 auto;
+  background:var(--purple);color:#fff;
+  padding:10px 16px;
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+}
+header h1{margin:0;font-size:clamp(20px,2.6vw,34px)}
+header .sub{font-size:12px;line-height:1.3;text-align:right;opacity:.95}
+
+main{
+  flex:1;min-height:0;
+  display:flex;flex-direction:column;
+  padding:10px;
+}
+.screen{display:none;height:100%;min-height:0}
+.screen.active{display:flex}
+.card{
+  border:2px solid #e5def8;border-radius:20px;background:#fff;
+  box-shadow:0 8px 18px #7b64bc16;
+}
+.hidden{display:none!important}
+
+#home{gap:10px}
+.homeGrid{
+  flex:1;min-height:0;
+  display:grid;grid-template-columns:1.05fr .95fr;gap:10px;
+}
+.intro,.preview{padding:16px;overflow:hidden}
+.intro h2{margin:0 0 8px;color:var(--purple-deep);font-size:clamp(26px,4vw,48px);line-height:1.02}
+.intro p,.preview p{margin:6px 0;font-size:clamp(14px,1.55vw,20px);line-height:1.35}
+.pickTitle{font-weight:900;font-size:clamp(18px,2vw,24px);color:var(--purple-deep);margin:10px 0 6px}
+.levelRow,.modeRow{display:grid;gap:8px}
+.levelRow{grid-template-columns:repeat(3,1fr)}
+.modeRow{grid-template-columns:1fr 1fr;margin-top:4px}
+.pickBtn,.modeBtn{
+  border:3px solid #d9cdf4;background:#fcfbff;color:var(--ink);
+  border-radius:16px;padding:10px 8px;font-weight:900;font-size:clamp(15px,1.6vw,20px);
+  line-height:1.15
+}
+.pickBtn small,.modeBtn small{font-size:.72em;font-weight:700;opacity:.8}
+.pickBtn.active{background:#f1ecff;border-color:var(--purple);color:var(--purple-deep)}
+.modeBtn.one{background:var(--p1);border-color:#357bd7;color:#fff}
+.modeBtn.two{background:linear-gradient(90deg,var(--p1) 50%,var(--p2) 50%);border-color:#b08a88;color:#fff}
+.preview h3{margin:0 0 8px;color:var(--purple-deep);font-size:clamp(20px,2.3vw,30px)}
+.preview ul{margin:0 0 8px 18px;padding:0;font-size:clamp(14px,1.45vw,18px);line-height:1.45}
+.preview li{margin:4px 0}
+.miniBattle{
+  height:120px;margin-top:8px;border:2px solid #ddd2f8;border-radius:18px;background:linear-gradient(#f4efff 0 58%, #caefbc 58% 100%);
+  position:relative;overflow:hidden
+}
+.mcastle{position:absolute;bottom:12px;width:88px;height:58px;border:3px solid #ac98e2;background:#f7f4ff;border-radius:8px 8px 0 0}
+.mcastle:before,.mcastle:after{content:"";position:absolute;top:-16px;width:20px;height:16px;border:3px solid #ac98e2;background:#f7f4ff}
+.mcastle:before{left:8px}.mcastle:after{right:8px}
+.mgate{position:absolute;bottom:0;left:29px;width:24px;height:26px;border:3px solid #ac98e2;border-bottom:none;border-radius:12px 12px 0 0}
+.mc1{left:18px}.mc2{right:18px}
+.mshot{position:absolute;left:50%;top:38px;transform:translateX(-50%);font-size:32px}
+.note{font-size:12px;color:#6e6490;text-align:center;margin-top:6px;line-height:1.25}
+
+#game{gap:8px;flex-direction:column;min-width:0;width:100%}
+.topControls{
+  flex:0 0 auto;width:100%;
+  display:flex;justify-content:space-between;align-items:center;gap:8px
+}
+.btnRow{display:flex;gap:8px;flex-wrap:wrap}
+.smallbtn{
+  border:0;background:#f0ebfc;color:#684fb3;border-radius:12px;padding:8px 12px;font-weight:800;font-size:14px
+}
+.statusline{
+  flex:0 0 auto;width:100%;
+  display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center
+}
+.score{
+  padding:9px 12px;background:#fff;border:2px solid #ece4ff;border-radius:14px;font-weight:900;font-size:clamp(14px,1.4vw,18px)
+}
+.score.p1{border-color:#b9d5ff}
+.score.p2{border-color:#ffd1a3;text-align:right}
+.round{font-weight:900;color:#6f6690;text-align:center;font-size:clamp(14px,1.5vw,18px)}
+.progress{width:100%;height:8px;background:#ede7fa;border-radius:99px;overflow:hidden;flex:0 0 auto}
+.progress div{height:100%;background:var(--purple);width:0;transition:.25s}
+
+.gameGrid{
+  flex:1;min-height:0;width:100%;
+  display:grid;grid-template-rows:minmax(180px,34%) minmax(0,66%);gap:8px;
+}
+.battlefield{
+  position:relative;overflow:hidden;
+  border:2px solid #e4ddf8;border-radius:20px;background:linear-gradient(#f4efff 0 56%, #c7efb9 56% 100%);
+}
+.cloud{position:absolute;background:#fff;border-radius:999px;opacity:.86}
+.cloud.c1{left:6%;top:18px;width:88px;height:24px}
+.cloud.c2{left:10%;top:10px;width:38px;height:20px}
+.cloud.c3{right:10%;top:28px;width:100px;height:28px}
+.cloud.c4{right:18%;top:10px;width:44px;height:20px}
+
+.sideArea{position:absolute;bottom:10px;width:210px;text-align:center;z-index:2}
+.sideArea.left{left:12px}.sideArea.right{right:12px}
+.sideLabel{font-weight:900;font-size:clamp(16px,1.7vw,22px);margin-bottom:2px}
+.streakTxt{font-size:12px;font-weight:900;color:#6b6191;min-height:16px}
+.hpWrap{
+  width:152px;height:16px;border:2px solid #fff;border-radius:999px;background:#ffffff85;margin:6px auto 0;overflow:hidden
+}
+.hpFill{height:100%;background:linear-gradient(90deg,#46c06d,#198d4b);width:100%;transition:.25s}
+.castleWrap{position:relative;width:160px;height:116px;margin:auto}
+.castle{
+  position:absolute;bottom:0;left:14px;width:132px;height:90px;border:4px solid #a28fd7;background:#f7f4ff;border-radius:10px 10px 0 0;
+  transition:.2s
+}
+.castle:before,.castle:after{
+  content:"";position:absolute;top:-24px;width:30px;height:24px;border:4px solid #a28fd7;background:#f7f4ff
+}
+.castle:before{left:8px}.castle:after{right:8px}
+.window{position:absolute;width:16px;height:18px;border:3px solid #b39fe6;border-radius:9px 9px 0 0;top:26px;background:#fff}
+.w1{left:18px}.w2{left:55px}.w3{right:18px}
+.gate{
+  position:absolute;bottom:0;left:48px;width:32px;height:38px;border:4px solid #a28fd7;border-bottom:none;border-radius:14px 14px 0 0;background:#efe8ff
+}
+.cannon{
+  position:absolute;bottom:10px;width:56px;height:20px;background:#5a5b67;border-radius:12px;z-index:3
+}
+.cannon:before{content:"";position:absolute;top:4px;width:18px;height:18px;border-radius:50%;background:#444552}
+.left .cannon{left:132px;transform:rotate(-10deg)}
+.left .cannon:before{left:-10px}
+.right .cannon{right:132px;transform:rotate(190deg)}
+.right .cannon:before{right:-10px}
+.ball{
+  position:absolute;width:18px;height:18px;border-radius:50%;background:#2f3139;display:none;z-index:6;box-shadow:0 0 0 3px #ffffffaa inset
+}
+.explosion{position:absolute;display:none;z-index:7;font-size:44px;transform:translate(-50%,-50%)}
+.castle.damaged{filter:saturate(.85) brightness(.95)}
+.castle.crumble{opacity:.38;transform:translateY(4px)}
+
+.qcard{
+  min-height:0;padding:12px;display:flex;flex-direction:column;overflow:hidden
+}
+.topBadges{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap}
+.tag{
+  background:#f0eafb;color:#6b56a9;padding:6px 12px;border-radius:999px;font-weight:900;font-size:clamp(14px,1.45vw,18px)
+}
+.turnBanner,.timerBadge{
+  padding:8px 14px;border-radius:999px;font-weight:900;font-size:clamp(14px,1.5vw,18px)
+}
+.turn1{background:var(--p1bg);color:#336db8;border:2px solid #bfd7ff}
+.turn2{background:var(--p2bg);color:#c26c10;border:2px solid #ffd3a6}
+.timerBadge{background:#fff6ea;color:#be6d14;border:2px solid #ffd6a9;display:none}
+#questionTitle{
+  text-align:center;font-weight:900;font-size:clamp(18px,2vw,24px);line-height:1.2;
+  margin:8px 0
+}
+.worksheet{
+  flex:1;min-height:0;
+  border:2px solid #d8ccf6;border-radius:18px;background:#fcfbff;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:12px 16px;overflow:hidden
+}
+.mainline{font-size:clamp(24px,3vw,36px);font-weight:900;text-align:center;line-height:1.15;margin:4px 0 10px}
+.step{font-size:clamp(20px,2.4vw,30px);font-weight:900;text-align:center;line-height:1.3;margin:8px 0}
+.blank{
+  width:86px;max-width:18vw;height:46px;border:3px solid #bba9ea;border-radius:14px;background:#fff;
+  padding:4px 8px;text-align:center;font-size:clamp(20px,2.3vw,30px);font-weight:900;color:var(--ink);
+  vertical-align:middle;margin:0 2px
+}
+.blank.wide{width:110px}
+.blank.correct{border-color:var(--good);background:#eefbf3;color:#0d7a40}
+.blank.wrong{border-color:var(--bad);background:#fff2f2;color:#b12d2d}
+.choices{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px
+}
+.choiceBtn{
+  border:3px solid #d0c3f3;background:#fcfbff;border-radius:16px;padding:10px 8px;min-height:54px;
+  font-size:clamp(18px,2.1vw,26px);font-weight:900;color:var(--ink);line-height:1.15
+}
+.choiceBtn:hover{background:#f5f1ff}
+.choiceBtn.correct{border-color:var(--good);background:#e9f9ef;color:#08763c}
+.choiceBtn.wrong{border-color:var(--bad);background:#fff0f0;color:#b12d2d}
+.inputArea{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+.actionBtn{
+  border:0;border-radius:14px;padding:10px 18px;font-weight:900;font-size:18px;background:var(--purple-deep);color:#fff
+}
+.actionBtn.alt{background:#8e7bcb}
+.feedback{text-align:center;min-height:24px;font-size:clamp(16px,1.7vw,22px);font-weight:900;margin-top:8px}
+.explain{text-align:center;font-size:clamp(13px,1.35vw,17px);line-height:1.35;color:#5c5477;min-height:38px;margin-top:4px}
+
+#results{align-items:center;justify-content:center}
+.results{padding:24px;width:min(720px,100%);text-align:center}
+.results h2{font-size:clamp(30px,4vw,54px);color:var(--purple-deep);margin:0 0 10px}
+.trophy{font-size:72px}
+.results p{font-size:clamp(18px,2vw,24px);line-height:1.45}
+.bigbtn{border:0;border-radius:16px;padding:14px 22px;margin:6px;background:var(--purple-deep);color:#fff;font-size:20px;font-weight:900}
+.gold{background:#d28b1e}
+
+@media (max-width:900px){
+  .homeGrid{grid-template-columns:1fr}
+  .preview{display:none}
+}
+@media (max-width:700px){
+  body{padding:0}
+  .app{height:100vh;border-radius:0}
+  header{padding:8px 12px}
+  main{padding:8px}
+  .gameGrid{grid-template-rows:minmax(155px,32%) minmax(0,68%)}
+  .sideArea{width:160px}
+  .sideArea.left{left:0}.sideArea.right{right:0}
+  .castleWrap{transform:scale(.82);transform-origin:bottom center}
+  .statusline{grid-template-columns:1fr 72px 1fr}
+  .choices{grid-template-columns:1fr 1fr}
+  .blank{height:42px;width:72px}
+  .intro,.preview{padding:12px}
+}
+@media (max-height:760px){
+  .intro p,.preview ul{font-size:13px}
+  .pickTitle{font-size:16px}
+  .pickBtn,.modeBtn{padding:8px 6px;font-size:14px}
+  .gameGrid{grid-template-rows:minmax(145px,31%) minmax(0,69%)}
+  .battlefield{border-radius:16px}
+  .sideArea{bottom:4px}
+  .castleWrap{transform:scale(.76);transform-origin:bottom center}
+  .qcard{padding:10px}
+  .worksheet{padding:10px 12px}
+  .mainline{margin-bottom:6px}
+  .step{margin:5px 0}
+  .choiceBtn{min-height:48px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <h1>🏰 Castle Conversion Battle</h1>
+  <div class="sub">Direct answer • helper step • timed hard mode<br>Correct answers fire the cannon</div>
+</header>
+
+<main>
+  <section id="home" class="screen active">
+    <div class="homeGrid">
+      <div class="card intro">
+        <h2>Siege the Enemy Castle!</h2>
+        <p>Answer length-conversion questions. Every correct answer lets your side fire a cannon shot.</p>
+
+        <div class="pickTitle">Choose difficulty</div>
+        <div class="levelRow">
+          <button class="pickBtn active" id="btnEasy" onclick="setDifficulty('easy')">Easy<br><small>Direct answer MCQ</small></button>
+          <button class="pickBtn" id="btnIntermediate" onclick="setDifficulty('intermediate')">Intermediate<br><small>1 helper step shown</small></button>
+          <button class="pickBtn" id="btnHard" onclick="setDifficulty('hard')">Hard<br><small>No helper + fast timer</small></button>
+        </div>
+
+        <div class="pickTitle">Choose mode</div>
+        <div class="modeRow">
+          <button class="modeBtn one" onclick="startGame(1)">👤 1 Player</button>
+          <button class="modeBtn two" onclick="startGame(2)">👥 2 Players</button>
+        </div>
+
+        <div class="note">
+          Hard mode has a faster timer. In hard mode, a streak of 2 or more correct answers gives <b>2 cannon shots</b>.
+        </div>
+      </div>
+
+      <div class="card preview">
+        <h3>How the levels work</h3>
+        <ul>
+          <li><b>Easy</b> = only direct final answer multiple choice</li>
+          <li><b>Intermediate</b> = one helper step shown</li>
+          <li><b>Hard</b> = no helper at all + faster timer + 2 cannon shots for a streak</li>
+          <li>1-player: wrong answers let the enemy fire back</li>
+          <li>2-player: players take turns answering</li>
+        </ul>
+
+        <div class="miniBattle">
+          <div class="mcastle mc1"><div class="mgate"></div></div>
+          <div class="mshot">💣</div>
+          <div class="mcastle mc2"><div class="mgate"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="game" class="screen">
+    <div class="topControls">
+      <div class="btnRow">
+        <button class="smallbtn" onclick="goHome()">← Home</button>
+        <button class="smallbtn" onclick="restart()">↻ Restart</button>
+      </div>
+      <div class="btnRow">
+        <button class="smallbtn" id="soundBtn" onclick="toggleSound()">🔊 Sound On</button>
+      </div>
+    </div>
+
+    <div class="statusline">
+      <div class="score p1" id="score1">Your Hits: 0</div>
+      <div class="round" id="round">Turn 1 / 12</div>
+      <div class="score p2" id="score2">Enemy Hits: 0</div>
+    </div>
+    <div class="progress"><div id="bar"></div></div>
+
+    <div class="gameGrid">
+      <div class="battlefield" id="battlefield">
+        <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div><div class="cloud c4"></div>
+
+        <div class="sideArea left">
+          <div class="sideLabel" id="label1">You</div>
+          <div class="streakTxt" id="streak1"></div>
+          <div class="castleWrap left">
+            <div class="castle" id="castle1">
+              <div class="window w1"></div><div class="window w2"></div><div class="window w3"></div><div class="gate"></div>
+            </div>
+            <div class="cannon"></div>
+          </div>
+          <div class="hpWrap"><div class="hpFill" id="hp1"></div></div>
+        </div>
+
+        <div class="sideArea right">
+          <div class="sideLabel" id="label2">Enemy</div>
+          <div class="streakTxt" id="streak2"></div>
+          <div class="castleWrap right">
+            <div class="castle" id="castle2">
+              <div class="window w1"></div><div class="window w2"></div><div class="window w3"></div><div class="gate"></div>
+            </div>
+            <div class="cannon"></div>
+          </div>
+          <div class="hpWrap"><div class="hpFill" id="hp2"></div></div>
+        </div>
+
+        <div class="ball" id="ball"></div>
+        <div class="explosion" id="explosion">💥</div>
+      </div>
+
+      <div class="card qcard">
+        <div class="topBadges">
+          <div class="tag" id="tag">Easy</div>
+          <div class="turnBanner turn1" id="turnBanner">👤 Your Turn</div>
+          <div class="timerBadge" id="timerBadge">⏱ 12</div>
+        </div>
+
+        <div id="questionTitle">Answer the question.</div>
+
+        <div class="worksheet" id="worksheet"></div>
+
+        <div id="choices" class="choices hidden"></div>
+
+        <div class="inputArea">
+          <button id="checkBtn" class="actionBtn hidden" onclick="checkInputs()">Check Answer</button>
+          <button id="nextBtn" class="actionBtn alt hidden" onclick="nextTurn()">Next →</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+        <div class="explain" id="explain"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="results" class="screen">
+    <div class="card results">
+      <div class="trophy" id="trophy">🏆</div>
+      <h2 id="resultTitle">Battle Over!</h2>
+      <p id="resultText"></p>
+      <button class="bigbtn" onclick="restart()">Play Again</button>
+      <button class="bigbtn gold" onclick="goHome()">Choose Level</button>
+    </div>
+  </section>
+</main>
+</div>
+
+<script>
+const MAX_HP = 6;
+const MAX_TURNS = 12;
+const HARD_TIME = 12;
+
+let mode = 1;                 // 1 = solo, 2 = two-player
+let difficulty = "easy";
+let round = 0;
+let hp = [MAX_HP, MAX_HP];
+let hits = [0,0];
+let streaks = [0,0];
+let currentPlayer = 0;        // 0 left, 1 right
+let currentQuestion = null;
+let questions = [];
+let resolved = false;
+let timer = null;
+let timeLeft = HARD_TIME;
+let soundOn = true;
+let audioCtx = null;
+
+// ---------- AUDIO ----------
+function initAudio(){
+  if(audioCtx) return;
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if(!Ctx) return;
+  audioCtx = new Ctx();
+}
+function beep(freq=440, duration=0.15, type="square", volume=0.04, delay=0){
+  if(!soundOn) return;
+  initAudio();
+  if(!audioCtx) return;
+  const start = audioCtx.currentTime + delay;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, start);
+  gain.gain.setValueAtTime(0.0001, start);
+  gain.gain.exponentialRampToValueAtTime(volume, start + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(start);
+  osc.stop(start + duration + 0.02);
+}
+function playCorrect(){ beep(660,0.09,"triangle",0.05,0); beep(880,0.12,"triangle",0.05,0.1); }
+function playWrong(){ beep(220,0.12,"sawtooth",0.05,0); beep(170,0.18,"sawtooth",0.04,0.12); }
+function playShoot(){ beep(180,0.06,"square",0.05,0); beep(120,0.12,"square",0.04,0.05); }
+function playExplosion(){ beep(80,0.18,"sawtooth",0.07,0); beep(60,0.22,"sawtooth",0.05,0.05); }
+function playTick(){ beep(520,0.03,"square",0.025,0); }
+function playWin(){ beep(523,0.08,"triangle",0.04,0); beep(659,0.08,"triangle",0.04,0.1); beep(784,0.12,"triangle",0.05,0.2); }
+function toggleSound(){
+  soundOn = !soundOn;
+  document.getElementById("soundBtn").textContent = soundOn ? "🔊 Sound On" : "🔇 Sound Off";
+  if(soundOn) playCorrect();
+}
+
+// ---------- BASIC UI ----------
+function show(id){
+  document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+function shuffle(a){ return [...a].sort(()=>Math.random()-.5); }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+function setDifficulty(level){
+  difficulty = level;
+  ["Easy","Intermediate","Hard"].forEach(name=>{
+    document.getElementById("btn"+name).classList.remove("active");
+  });
+  document.getElementById("btn"+capitalize(level)).classList.add("active");
+}
+function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+function goHome(){
+  stopTimer();
+  show("home");
+}
+function startGame(m){
+  mode = m;
+  initAudio();
+  if(audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+  restart();
+}
+function restart(){
+  stopTimer();
+  round = 0;
+  hp = [MAX_HP, MAX_HP];
+  hits = [0,0];
+  streaks = [0,0];
+  currentPlayer = 0;
+  questions = buildQuestions(MAX_TURNS);
+  document.getElementById("label1").textContent = mode===1 ? "You" : "Player 1";
+  document.getElementById("label2").textContent = mode===1 ? "Enemy" : "Player 2";
+  show("game");
+  updateBattleUI();
+  renderQuestion();
+}
+
+// ---------- QUESTION GENERATION ----------
+function makeInput(idx, wide=false){
+  return `<input class="blank ${wide?'wide':''}" data-idx="${idx}" inputmode="numeric" autocomplete="off">`;
+}
+function getInputs(){ return [...document.querySelectorAll('.blank[data-idx]')]; }
+function optionSet(correct, wrongs){
+  let set = new Set([correct]);
+  shuffle(wrongs).forEach(w=>{ if(set.size<4 && w !== correct) set.add(w); });
+  return shuffle([...set]);
+}
+
+// Easy-mode distractors are based on common place-value / unit-conversion mistakes.
+// They deliberately use similar digits so pupils must think rather than spot an absurd option.
+function trickyMcmToCm(m, cm, step, total){
+  const droppedDigit = step + Math.floor(cm/10);
+  const shiftedRemainder = step + cm*10;
+  return optionSet(`${total} cm`, [
+    `${step} cm`,                              // forget the cm part
+    `${total + 100} cm`,                      // metre part one hundred too large
+    `${Math.max(1,total - 100)} cm`,          // metre part one hundred too small
+    `${m*1000 + cm} cm`,                      // use 1000 instead of 100
+    `${shiftedRemainder} cm`,                 // shift the cm digits one place
+    `${droppedDigit} cm`,                     // drop a zero/place
+    `${m + cm} cm`                            // add unlike units as raw numbers
+  ]);
+}
+
+function trickyCmToMcm(total, m, cm){
+  const cmText = String(cm);
+  const dropZero = cmText.includes("0") ? Number(cmText.replace("0","")) : Math.floor(cm/10);
+  const shiftedCm = cm < 10 ? cm*10 : dropZero;
+  return optionSet(`${m} m ${cm} cm`, [
+    `${m} m ${shiftedCm} cm`,                 // shift/drop a zero in the remainder
+    `${m*10} m ${cm} cm`,                     // metre digit shifted one place
+    `${Math.max(0,m-1)} m ${cm} cm`,          // whole metres one too few
+    `${m+1} m ${cm} cm`,                      // whole metres one too many
+    `${cm} m ${m} cm`,                        // swap the two parts
+    `${Math.floor(total/10)} m ${total%10} cm`
+  ]);
+}
+
+function trickyKmmToM(km, m, step, total){
+  return optionSet(`${total} m`, [
+    `${km*100 + m} m`,                        // use 100 m per km
+    `${km*10000 + m} m`,                      // use 10 000 m per km
+    `${step + m*10} m`,                       // shift the metre remainder
+    `${step + Math.floor(m/10)} m`,           // drop a zero/place
+    `${step} m`,                              // forget the metre remainder
+    `${total + 1000} m`,                      // one km too many
+    `${Math.max(1,total - 1000)} m`           // one km too few
+  ]);
+}
+
+function trickyMToKmm(total, km, m){
+  const mText = String(m);
+  const dropZero = mText.includes("0") ? Number(mText.replace("0","")) : Math.floor(m/10);
+  const shiftedM = m*10 < 1000 ? m*10 : dropZero;
+  return optionSet(`${km} km ${m} m`, [
+    `${km} km ${shiftedM} m`,                 // shift/drop a zero in metre remainder
+    `${km} km ${dropZero} m`,
+    `${km*10} km ${m} m`,                     // km digit shifted one place
+    `${Math.max(0,km-1)} km ${m} m`,          // whole km one too few
+    `${km+1} km ${m} m`,                      // whole km one too many
+    `${m} km ${km} m`                         // swap the parts
+  ]);
+}
+function buildQuestions(total){
+  let arr = [];
+  for(let i=0;i<total;i++) arr.push(makeQuestion());
+  return arr;
+}
+function makeQuestion(){
+  const type = pick(["mcm_to_cm","cm_to_mcm","kmm_to_m","m_to_kmm"]);
+
+  // m and cm -> cm
+  if(type==="mcm_to_cm"){
+    const m = pick([1,2,3,4,5,6,7,8]);
+    const cm = pick([5,10,15,20,25,30,35,40,45,50,60,70,80,90]);
+    const step = m*100;
+    const total = step + cm;
+
+    if(difficulty==="easy"){
+      const correct = `${total} cm`;
+      return {
+        mode:"choice",
+        tag:"Easy • Direct answer",
+        title:"Convert to cm.",
+        html:`<div class="mainline">${m} m ${cm} cm = ? cm</div>`,
+        options: trickyMcmToCm(m, cm, step, total),
+        correct,
+        explain:`${m} m = ${step} cm, so the answer is ${total} cm.`
+      };
+    }
+    if(difficulty==="intermediate"){
+      return {
+        mode:"inputs",
+        tag:"Intermediate • 1 helper step",
+        title:"Use the helper step, then fill in the final answer.",
+        html:`
+          <div class="mainline">${m} m ${cm} cm</div>
+          <div class="step">= ${step} cm + ${cm} cm</div>
+          <div class="step">= ${makeInput(0, true)} cm</div>
+        `,
+        answers:[total],
+        explain:`${step} cm + ${cm} cm = ${total} cm.`
+      };
+    }
+    return {
+      mode:"inputs",
+      tag:"Hard • No helper",
+      title:"No helper shown. Fill in the final answer.",
+      html:`
+        <div class="mainline">${m} m ${cm} cm</div>
+        <div class="step">= ${makeInput(0, true)} cm</div>
+      `,
+      answers:[total],
+      explain:`${m} m = ${step} cm, so ${step} cm + ${cm} cm = ${total} cm.`
+    };
+  }
+
+  // cm -> m and cm
+  if(type==="cm_to_mcm"){
+    const m = pick([1,2,3,4,5,6,7,8,9]);
+    const cm = pick([4,8,12,15,20,24,35,47,56,74,82,90]);
+    const total = m*100 + cm;
+    const step = m*100;
+
+    if(difficulty==="easy"){
+      const correct = `${m} m ${cm} cm`;
+      return {
+        mode:"choice",
+        tag:"Easy • Direct answer",
+        title:"Convert to m and cm.",
+        html:`<div class="mainline">${total} cm = ?</div>`,
+        options: trickyCmToMcm(total, m, cm),
+        correct,
+        explain:`${total} cm = ${step} cm + ${cm} cm, so the answer is ${m} m ${cm} cm.`
+      };
+    }
+    if(difficulty==="intermediate"){
+      return {
+        mode:"inputs",
+        tag:"Intermediate • 1 helper step",
+        title:"Use the helper step, then fill in the final answer.",
+        html:`
+          <div class="mainline">${total} cm</div>
+          <div class="step">= ${step} cm + ${cm} cm</div>
+          <div class="step">= ${makeInput(0)} m ${makeInput(1)} cm</div>
+        `,
+        answers:[m,cm],
+        explain:`${step} cm = ${m} m, so the answer is ${m} m ${cm} cm.`
+      };
+    }
+    return {
+      mode:"inputs",
+      tag:"Hard • No helper",
+      title:"No helper shown. Fill in the final answer.",
+      html:`
+        <div class="mainline">${total} cm</div>
+        <div class="step">= ${makeInput(0)} m ${makeInput(1)} cm</div>
+      `,
+      answers:[m,cm],
+      explain:`${total} cm = ${step} cm + ${cm} cm = ${m} m ${cm} cm.`
+    };
+  }
+
+  // km and m -> m
+  if(type==="kmm_to_m"){
+    const km = pick([1,2,3,4,5,6]);
+    const m = pick([8,20,45,90,120,250,430,600,805]);
+    const step = km*1000;
+    const total = step + m;
+
+    if(difficulty==="easy"){
+      const correct = `${total} m`;
+      return {
+        mode:"choice",
+        tag:"Easy • Direct answer",
+        title:"Convert to m.",
+        html:`<div class="mainline">${km} km ${m} m = ? m</div>`,
+        options: trickyKmmToM(km, m, step, total),
+        correct,
+        explain:`${km} km = ${step} m, so the answer is ${total} m.`
+      };
+    }
+    if(difficulty==="intermediate"){
+      return {
+        mode:"inputs",
+        tag:"Intermediate • 1 helper step",
+        title:"Use the helper step, then fill in the final answer.",
+        html:`
+          <div class="mainline">${km} km ${m} m</div>
+          <div class="step">= ${step} m + ${m} m</div>
+          <div class="step">= ${makeInput(0, true)} m</div>
+        `,
+        answers:[total],
+        explain:`${step} m + ${m} m = ${total} m.`
+      };
+    }
+    return {
+      mode:"inputs",
+      tag:"Hard • No helper",
+      title:"No helper shown. Fill in the final answer.",
+      html:`
+        <div class="mainline">${km} km ${m} m</div>
+        <div class="step">= ${makeInput(0, true)} m</div>
+      `,
+      answers:[total],
+      explain:`${km} km = ${step} m, so ${step} m + ${m} m = ${total} m.`
+    };
+  }
+
+  // m -> km and m
+  const km = pick([1,2,3,4,5,6,7]);
+  const m = pick([4,8,15,20,45,90,112,235,400,608,999]);
+  const total = km*1000 + m;
+  const step = km*1000;
+
+  if(difficulty==="easy"){
+    const correct = `${km} km ${m} m`;
+    return {
+      mode:"choice",
+      tag:"Easy • Direct answer",
+      title:"Convert to km and m.",
+      html:`<div class="mainline">${total} m = ?</div>`,
+      options: trickyMToKmm(total, km, m),
+      correct,
+      explain:`${total} m = ${step} m + ${m} m, so the answer is ${km} km ${m} m.`
+    };
+  }
+  if(difficulty==="intermediate"){
+    return {
+      mode:"inputs",
+      tag:"Intermediate • 1 helper step",
+      title:"Use the helper step, then fill in the final answer.",
+      html:`
+        <div class="mainline">${total} m</div>
+        <div class="step">= ${step} m + ${m} m</div>
+        <div class="step">= ${makeInput(0)} km ${makeInput(1)} m</div>
+      `,
+      answers:[km,m],
+      explain:`${step} m = ${km} km, so the answer is ${km} km ${m} m.`
+    };
+  }
+  return {
+    mode:"inputs",
+    tag:"Hard • No helper",
+    title:"No helper shown. Fill in the final answer.",
+    html:`
+      <div class="mainline">${total} m</div>
+      <div class="step">= ${makeInput(0)} km ${makeInput(1)} m</div>
+    `,
+    answers:[km,m],
+    explain:`${total} m = ${step} m + ${m} m = ${km} km ${m} m.`
+  };
+}
+
+// ---------- RENDER QUESTION ----------
+function renderQuestion(){
+  resolved = false;
+  stopTimer();
+  currentQuestion = questions[round];
+
+  document.getElementById("round").textContent = `Turn ${round+1} / ${MAX_TURNS}`;
+  document.getElementById("bar").style.width = `${(round/MAX_TURNS)*100}%`;
+  document.getElementById("score1").textContent = `${mode===1 ? "Your" : "Player 1"} Hits: ${hits[0]}`;
+  document.getElementById("score2").textContent = `${mode===1 ? "Enemy" : "Player 2"} Hits: ${hits[1]}`;
+
+  document.getElementById("tag").textContent = currentQuestion.tag;
+  document.getElementById("questionTitle").textContent = currentQuestion.title;
+  document.getElementById("worksheet").innerHTML = currentQuestion.html;
+  document.getElementById("feedback").textContent = "";
+  document.getElementById("explain").textContent = "";
+  // Reset buttons every turn. They may have been disabled by the previous question.
+  const checkBtn = document.getElementById("checkBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  checkBtn.disabled = false;
+  nextBtn.disabled = false;
+  nextBtn.classList.add("hidden");
+  checkBtn.classList.add("hidden");
+  document.getElementById("choices").classList.add("hidden");
+  document.getElementById("choices").innerHTML = "";
+
+  const turnBanner = document.getElementById("turnBanner");
+  if(mode===2){
+    turnBanner.textContent = currentPlayer===0 ? "🔵 Player 1's Turn" : "🟠 Player 2's Turn";
+    turnBanner.className = "turnBanner " + (currentPlayer===0 ? "turn1" : "turn2");
+  }else{
+    turnBanner.textContent = "👤 Your Turn";
+    turnBanner.className = "turnBanner turn1";
+  }
+
+  if(currentQuestion.mode==="choice"){
+    renderChoices();
+  }else{
+    checkBtn.classList.remove("hidden");
+    const inputs = getInputs();
+    inputs.forEach(inp => {
+      inp.addEventListener("keydown", e => {
+        if(e.key === "Enter"){
+          e.preventDefault();
+          checkInputs();
+        }
+      });
+    });
+    if(inputs.length) inputs[0].focus();
+  }
+
+  if(difficulty==="hard"){
+    startTimer(HARD_TIME);
+  }else{
+    document.getElementById("timerBadge").style.display = "none";
+  }
+
+  updateBattleUI();
+}
+function renderChoices(){
+  const box = document.getElementById("choices");
+  box.classList.remove("hidden");
+  currentQuestion.options.forEach(op=>{
+    const b = document.createElement("button");
+    b.className = "choiceBtn";
+    b.textContent = op;
+    b.onclick = () => checkChoice(b, op);
+    box.appendChild(b);
+  });
+}
+
+// ---------- ANSWER CHECK ----------
+function normalize(val){
+  if(val===null || val===undefined) return null;
+  const t = String(val).trim();
+  if(t==="") return null;
+  if(!/^-?\d+$/.test(t)) return NaN;
+  return Number(t);
+}
+function disableInteraction(){
+  document.querySelectorAll(".choiceBtn").forEach(b=>b.disabled = true);
+  document.getElementById("checkBtn").disabled = true;
+  getInputs().forEach(inp=>inp.disabled = true);
+}
+function markCorrectChoice(correct){
+  document.querySelectorAll(".choiceBtn").forEach(b=>{
+    if(b.textContent.trim() === correct) b.classList.add("correct");
+  });
+}
+function setFeedback(text, good){
+  const fb = document.getElementById("feedback");
+  fb.textContent = text;
+  fb.style.color = good ? "#14884b" : "#b43b3b";
+}
+async function checkChoice(btn, value){
+  if(resolved) return;
+  resolved = true;
+  stopTimer();
+  disableInteraction();
+
+  const ok = value === currentQuestion.correct;
+  if(ok){
+    btn.classList.add("correct");
+    playCorrect();
+    setFeedback("✅ Correct!", true);
+  }else{
+    btn.classList.add("wrong");
+    markCorrectChoice(currentQuestion.correct);
+    playWrong();
+    setFeedback("❌ Not quite.", false);
+  }
+  document.getElementById("explain").textContent = currentQuestion.explain;
+  await handleOutcome(ok);
+}
+async function checkInputs(){
+  if(resolved) return;
+
+  const values = getInputs().map(inp => normalize(inp.value));
+  if(values.some(v => v===null)){
+    setFeedback("⚠️ Please fill in all blanks first.", false);
+    return;
+  }
+
+  resolved = true;
+  stopTimer();
+  disableInteraction();
+
+  let ok = true;
+  getInputs().forEach((inp, i)=>{
+    const correct = Number(values[i]) === Number(currentQuestion.answers[i]);
+    inp.classList.add(correct ? "correct" : "wrong");
+    if(!correct) ok = false;
+  });
+
+  if(ok){
+    playCorrect();
+    setFeedback("✅ Correct!", true);
+  }else{
+    playWrong();
+    setFeedback("❌ Not quite.", false);
+  }
+  document.getElementById("explain").textContent = currentQuestion.explain;
+  await handleOutcome(ok);
+}
+async function onTimeUp(){
+  if(resolved) return;
+  resolved = true;
+  disableInteraction();
+  playWrong();
+  setFeedback("⏰ Time's up!", false);
+  document.getElementById("explain").textContent = currentQuestion.explain;
+  await handleOutcome(false);
+}
+
+// ---------- TIMER ----------
+function startTimer(seconds){
+  timeLeft = seconds;
+  const badge = document.getElementById("timerBadge");
+  badge.style.display = "inline-block";
+  badge.textContent = `⏱ ${timeLeft}`;
+  timer = setInterval(()=>{
+    timeLeft--;
+    badge.textContent = `⏱ ${timeLeft}`;
+    if(timeLeft <= 3 && timeLeft > 0) playTick();
+    if(timeLeft <= 0){
+      stopTimer();
+      onTimeUp();
+    }
+  },1000);
+}
+function stopTimer(){
+  if(timer){
+    clearInterval(timer);
+    timer = null;
+  }
+}
+
+// ---------- GAME LOGIC ----------
+async function handleOutcome(correct){
+  let shots = 0;
+  let shooter = null;
+  let target = null;
+
+  if(mode===1){
+    if(correct){
+      streaks[0] += 1;
+      streaks[1] = 0;
+      shots = (difficulty==="hard" && streaks[0] >= 2) ? 2 : 1;
+      shooter = 0; target = 1;
+    }else{
+      streaks[0] = 0;
+      streaks[1] = 0;
+      shots = 1;
+      shooter = 1; target = 0;
+    }
+  }else{
+    if(correct){
+      streaks[currentPlayer] += 1;
+      streaks[currentPlayer===0 ? 1 : 0] = 0;
+      shots = (difficulty==="hard" && streaks[currentPlayer] >= 2) ? 2 : 1;
+      shooter = currentPlayer; target = currentPlayer===0 ? 1 : 0;
+    }else{
+      streaks[currentPlayer] = 0;
+      shots = 0;
+    }
+  }
+
+  updateBattleUI();
+
+  if(shots > 0){
+    if(difficulty==="hard" && shots===2){
+      setFeedback("🔥 Streak bonus! 2 cannon shots!", true);
+    }
+    await animateShotSequence(shooter, target, shots);
+  }
+
+  document.getElementById("score1").textContent = `${mode===1 ? "Your" : "Player 1"} Hits: ${hits[0]}`;
+  document.getElementById("score2").textContent = `${mode===1 ? "Enemy" : "Player 2"} Hits: ${hits[1]}`;
+  document.getElementById("nextBtn").classList.remove("hidden");
+
+  if(hp[0]===0 || hp[1]===0){
+    document.getElementById("nextBtn").textContent = "See Winner →";
+  }else{
+    document.getElementById("nextBtn").textContent = "Next →";
+  }
+}
+async function animateShotSequence(shooter, target, count){
+  for(let i=0;i<count;i++){
+    if(hp[target] <= 0) break;
+    await animateSingleShot(shooter, target);
+    await sleep(180);
+  }
+}
+function animateSingleShot(shooter, target){
+  return new Promise(resolve=>{
+    const field = document.getElementById("battlefield");
+    const ball = document.getElementById("ball");
+    const explosion = document.getElementById("explosion");
+    const rect = field.getBoundingClientRect();
+
+    const startX = shooter===0 ? 145 : rect.width - 145;
+    const endX = target===0 ? 105 : rect.width - 105;
+    const baseY = 120;
+    const diff = endX - startX;
+
+    ball.style.display = "block";
+    ball.style.left = startX + "px";
+    ball.style.top = baseY + "px";
+    explosion.style.display = "none";
+
+    playShoot();
+
+    const anim = ball.animate([
+      { transform:"translate(0,0) scale(1)", opacity:1 },
+      { transform:`translate(${diff/2}px,-72px) scale(1.05)`, opacity:1, offset:0.5 },
+      { transform:`translate(${diff}px,0) scale(1)`, opacity:1 }
+    ], { duration:700, easing:"ease-in-out" });
+
+    anim.onfinish = ()=>{
+      ball.style.display = "none";
+      explosion.style.display = "block";
+      explosion.style.left = endX + "px";
+      explosion.style.top = (baseY-8) + "px";
+      playExplosion();
+
+      hp[target] = Math.max(0, hp[target]-1);
+      hits[shooter] += 1;
+      updateBattleUI();
+
+      setTimeout(()=>{
+        explosion.style.display = "none";
+        resolve();
+      }, 260);
+    };
+  });
+}
+function updateBattleUI(){
+  document.getElementById("hp1").style.width = `${(hp[0]/MAX_HP)*100}%`;
+  document.getElementById("hp2").style.width = `${(hp[1]/MAX_HP)*100}%`;
+
+  const c1 = document.getElementById("castle1");
+  const c2 = document.getElementById("castle2");
+  [c1,c2].forEach((c, idx)=>{
+    c.classList.remove("damaged","crumble");
+    if(hp[idx] <= 3) c.classList.add("damaged");
+    if(hp[idx] === 0) c.classList.add("crumble");
+  });
+
+  if(difficulty==="hard"){
+    document.getElementById("streak1").textContent = streaks[0] >= 2 ? `🔥 Streak: ${streaks[0]}` : "";
+    document.getElementById("streak2").textContent = streaks[1] >= 2 ? `🔥 Streak: ${streaks[1]}` : "";
+  }else{
+    document.getElementById("streak1").textContent = "";
+    document.getElementById("streak2").textContent = "";
+  }
+}
+function nextTurn(){
+  stopTimer();
+  if(hp[0]===0 || hp[1]===0 || round >= MAX_TURNS-1){
+    finishGame();
+    return;
+  }
+  round++;
+  if(mode===2) currentPlayer = currentPlayer===0 ? 1 : 0;
+  renderQuestion();
+}
+function finishGame(){
+  stopTimer();
+  document.getElementById("bar").style.width = "100%";
+  show("results");
+
+  if(mode===1){
+    const youWon = hp[1]===0 || hits[0] > hits[1];
+    document.getElementById("trophy").textContent = youWon ? "🏆" : "🛡️";
+    document.getElementById("resultTitle").textContent = youWon ? "You Won the Siege!" : "Enemy Castle Held Out!";
+    document.getElementById("resultText").innerHTML =
+      `Your hits: <b>${hits[0]}</b><br>Enemy hits: <b>${hits[1]}</b><br><br>` +
+      (youWon ? `Well done! You defeated the enemy castle.` : `Try again and knock down the enemy castle next time.`);
+  }else{
+    let title = "It's a Draw!";
+    if(hp[1]===0 || hits[0] > hits[1]) title = "Player 1 Wins!";
+    if(hp[0]===0 || hits[1] > hits[0]) title = "Player 2 Wins!";
+    document.getElementById("trophy").textContent = title==="It's a Draw!" ? "🤝" : "🏆";
+    document.getElementById("resultTitle").textContent = title;
+    document.getElementById("resultText").innerHTML =
+      `Player 1 hits: <b>${hits[0]}</b><br>Player 2 hits: <b>${hits[1]}</b><br><br>` +
+      `Players took turns answering. Every correct answer fired the cannon.`;
+  }
+  playWin();
+}
+</script>
+</body>
+</html>
