@@ -1,0 +1,74 @@
+name: Patch Practice 2 random questions and input checking
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-practice2-random-inputs.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch Practice 2
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          new_question_block = r'''function makeInput(id,wide=false,label="answer"){return `<input id="${id}" class="blank ${wide?'wide':''}" data-answer-field="${id}" inputmode="numeric" autocomplete="off" aria-label="${label}">`}
+          function getInputs(){if(!currentQuestion||!Array.isArray(currentQuestion.fields))return[];return currentQuestion.fields.map(id=>document.getElementById(id)).filter(Boolean)}
+          function randInt(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+          function optionSet(correct,wrongs){let set=new Set([correct]);shuffle(wrongs).forEach(w=>{if(set.size<4&&w!==correct)set.add(w)});return shuffle([...set])}
+          function sensibleCm(){if(difficulty==="easy")return pick([10,20,30,40,50,60,70,80,90]);if(difficulty==="intermediate")return pick([5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95]);return randInt(1,99)}
+          function sensibleMetresPart(){if(difficulty==="easy")return pick([100,200,300,400,500,600,700,800,900]);if(difficulty==="intermediate")return pick([25,50,75,100,125,150,200,225,250,300,350,400,450,500,550,600,650,700,750,800,850,900,950]);return randInt(1,999)}
+          function trickyMcmToCm(m,cm,step,total){return optionSet(`${total} cm`,[`${step} cm`,`${total+100} cm`,`${Math.max(1,total-100)} cm`,`${step+cm*10} cm`,`${m+cm} cm`,`${m*10+cm} cm`])}
+          function trickyCmToMcm(total,m,cm){return optionSet(`${m} m ${cm} cm`,[`${m+1} m ${cm} cm`,`${Math.max(0,m-1)} m ${cm} cm`,`${m} m ${Math.min(99,cm+10)} cm`,`${cm} m ${m} cm`,`${Math.floor(total/10)} m ${total%10} cm`])}
+          function trickyKmmToM(km,m,step,total){return optionSet(`${total} m`,[`${step} m`,`${total+1000} m`,`${Math.max(1,total-1000)} m`,`${km*100+m} m`,`${step+m*10} m`,`${km+m} m`])}
+          function trickyMToKmm(total,km,m){return optionSet(`${km} km ${m} m`,[`${km+1} km ${m} m`,`${Math.max(0,km-1)} km ${m} m`,`${km} km ${Math.min(999,m+100)} m`,`${m} km ${km} m`,`${Math.floor(total/100)} km ${total%100} m`])}
+          function buildQuestions(total){const types=["mcm_to_cm","cm_to_mcm","kmm_to_m","m_to_kmm"],plan=[];while(plan.length<total)plan.push(...shuffle(types));plan.length=total;const seen=new Set(),out=[];for(const type of plan){let q,tries=0;do{q=makeQuestion(type);tries++}while(seen.has(q.key)&&tries<60);seen.add(q.key);out.push(q)}return shuffle(out)}
+          function makeQuestion(type){
+           if(type==="mcm_to_cm"){const m=randInt(1,9),cm=sensibleCm(),step=m*100,total=step+cm,key=`mcm:${m}:${cm}`;if(difficulty==="easy")return{key,mode:"choice",tag:"Easy • Direct answer",title:"Convert to cm.",html:`<div class="mainline">${m} m ${cm} cm = ? cm</div>`,options:trickyMcmToCm(m,cm,step,total),correct:`${total} cm`,explain:`${m} m = ${step} cm, so ${step} cm + ${cm} cm = ${total} cm.`};const html=difficulty==="intermediate"?`<div class="mainline">${m} m ${cm} cm</div><div class="step">= ${step} cm + ${cm} cm</div><div class="step">= ${makeInput("finalCm",true,"final centimetres")} cm</div>`:`<div class="mainline">${m} m ${cm} cm</div><div class="step">= ${makeInput("finalCm",true,"final centimetres")} cm</div>`;return{key,mode:"inputs",tag:difficulty==="intermediate"?"Intermediate • 1 helper step":"Hard • No helper",title:difficulty==="intermediate"?"Use the helper step, then fill in the final answer.":"No helper shown. Fill in the final answer.",html,fields:["finalCm"],expected:{finalCm:total},explain:`${m} m = ${step} cm, so ${step} cm + ${cm} cm = ${total} cm.`}}
+           if(type==="cm_to_mcm"){const m=randInt(1,9),cm=sensibleCm(),total=m*100+cm,step=m*100,key=`cm:${total}`;if(difficulty==="easy")return{key,mode:"choice",tag:"Easy • Direct answer",title:"Convert to m and cm.",html:`<div class="mainline">${total} cm = ?</div>`,options:trickyCmToMcm(total,m,cm),correct:`${m} m ${cm} cm`,explain:`${total} cm = ${step} cm + ${cm} cm, so the answer is ${m} m ${cm} cm.`};const html=difficulty==="intermediate"?`<div class="mainline">${total} cm</div><div class="step">= ${step} cm + ${cm} cm</div><div class="step">= ${makeInput("metresAnswer",false,"metres")} m ${makeInput("cmAnswer",false,"centimetres")} cm</div>`:`<div class="mainline">${total} cm</div><div class="step">= ${makeInput("metresAnswer",false,"metres")} m ${makeInput("cmAnswer",false,"centimetres")} cm</div>`;return{key,mode:"inputs",tag:difficulty==="intermediate"?"Intermediate • 1 helper step":"Hard • No helper",title:difficulty==="intermediate"?"Use the helper step, then fill in the final answer.":"No helper shown. Fill in the final answer.",html,fields:["metresAnswer","cmAnswer"],expected:{metresAnswer:m,cmAnswer:cm},explain:`${total} cm = ${step} cm + ${cm} cm = ${m} m ${cm} cm.`}}
+           if(type==="kmm_to_m"){const km=randInt(1,6),m=sensibleMetresPart(),step=km*1000,total=step+m,key=`kmm:${km}:${m}`;if(difficulty==="easy")return{key,mode:"choice",tag:"Easy • Direct answer",title:"Convert to m.",html:`<div class="mainline">${km} km ${m} m = ? m</div>`,options:trickyKmmToM(km,m,step,total),correct:`${total} m`,explain:`${km} km = ${step} m, so ${step} m + ${m} m = ${total} m.`};const html=difficulty==="intermediate"?`<div class="mainline">${km} km ${m} m</div><div class="step">= ${step} m + ${m} m</div><div class="step">= ${makeInput("finalM",true,"final metres")} m</div>`:`<div class="mainline">${km} km ${m} m</div><div class="step">= ${makeInput("finalM",true,"final metres")} m</div>`;return{key,mode:"inputs",tag:difficulty==="intermediate"?"Intermediate • 1 helper step":"Hard • No helper",title:difficulty==="intermediate"?"Use the helper step, then fill in the final answer.":"No helper shown. Fill in the final answer.",html,fields:["finalM"],expected:{finalM:total},explain:`${km} km = ${step} m, so ${step} m + ${m} m = ${total} m.`}}
+           const km=randInt(1,6),m=sensibleMetresPart(),total=km*1000+m,step=km*1000,key=`m:${total}`;if(difficulty==="easy")return{key,mode:"choice",tag:"Easy • Direct answer",title:"Convert to km and m.",html:`<div class="mainline">${total} m = ?</div>`,options:trickyMToKmm(total,km,m),correct:`${km} km ${m} m`,explain:`${total} m = ${step} m + ${m} m, so the answer is ${km} km ${m} m.`};const html=difficulty==="intermediate"?`<div class="mainline">${total} m</div><div class="step">= ${step} m + ${m} m</div><div class="step">= ${makeInput("kmAnswer",false,"kilometres")} km ${makeInput("mAnswer",false,"metres")} m</div>`:`<div class="mainline">${total} m</div><div class="step">= ${makeInput("kmAnswer",false,"kilometres")} km ${makeInput("mAnswer",false,"metres")} m</div>`;return{key,mode:"inputs",tag:difficulty==="intermediate"?"Intermediate • 1 helper step":"Hard • No helper",title:difficulty==="intermediate"?"Use the helper step, then fill in the final answer.":"No helper shown. Fill in the final answer.",html,fields:["kmAnswer","mAnswer"],expected:{kmAnswer:km,mAnswer:m},explain:`${total} m = ${step} m + ${m} m = ${km} km ${m} m.`}}
+          '''
+
+          new_check = r'''async function checkInputs(){if(resolved)return;const inputs=getInputs();if(inputs.length!==currentQuestion.fields.length){setFeedback("⚠️ Answer boxes did not load correctly. Please press Restart.",false);return}const values={};let missing=false,invalid=false;for(const id of currentQuestion.fields){const input=document.getElementById(id),v=normalize(input?input.value:null);values[id]=v;if(v===null)missing=true;if(Number.isNaN(v))invalid=true}if(missing){setFeedback("⚠️ Please fill in all blanks first.",false);return}if(invalid){setFeedback("⚠️ Please use whole numbers only.",false);return}resolved=true;stopTimer();disableInteraction();let ok=true;for(const id of currentQuestion.fields){const input=document.getElementById(id),c=Number(values[id])===Number(currentQuestion.expected[id]);input.classList.add(c?"correct":"wrong");if(!c)ok=false}if(ok){playCorrect();setFeedback("✅ Correct! Javelin away!",true)}else{playWrong();setFeedback("❌ Not quite. No distance this throw.",false)}document.getElementById("explain").textContent=currentQuestion.explain;await handleOutcome(ok)}
+          '''
+
+          s2, n1 = re.subn(r'function makeInput\(idx,wide=false\).*?(?=function renderQuestion\(\))', new_question_block + '\n', s, count=1, flags=re.S)
+          if n1 != 1:
+              raise SystemExit(f'question block replacement count = {n1}')
+          s3, n2 = re.subn(r'async function checkInputs\(\)\{.*?(?=async function onTimeUp\(\))', new_check + '\n', s2, count=1, flags=re.S)
+          if n2 != 1:
+              raise SystemExit(f'checkInputs replacement count = {n2}')
+
+          old_note = 'The field is 60 m long. In 1-player mode, each correct answer adds 5 m. In 2-player mode, each correct answer adds 10 m so both players can reach 60 m in six turns.'
+          new_note = 'Each game has 12 fresh questions: 3 of each conversion type, with no exact repeated question in the same game. Values stay within sensible whole-number ranges.'
+          s3 = s3.replace(old_note, new_note)
+          p.write_text(s3, encoding='utf-8')
+      - name: Validate JavaScript
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text()
+          a=s.index('<script>')+len('<script>')
+          b=s.index('</script>',a)
+          Path('/tmp/practice2.js').write_text(s[a:b])
+          PY
+          node --check /tmp/practice2.js
+      - name: Commit patched practice
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Fix Practice 2 levels and randomise questions"
+          git push
