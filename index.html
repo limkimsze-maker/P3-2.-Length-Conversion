@@ -16,7 +16,11 @@ button,input{font:inherit}button{cursor:pointer;touch-action:manipulation}img,sv
 body{padding:8px;padding-left:max(8px,env(safe-area-inset-left));padding-right:max(8px,env(safe-area-inset-right));padding-bottom:max(8px,env(safe-area-inset-bottom))}
 .app{width:min(1280px,100%);height:calc(100vh - 16px);margin:auto;display:flex;flex-direction:column;background:#fff;border:2px solid #cde9dc;border-radius:24px;overflow:hidden;box-shadow:0 12px 32px #277d5c22}
 header{flex:0 0 auto;background:linear-gradient(100deg,var(--green2),var(--green));color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
-header h1{margin:0;font-size:clamp(20px,2.6vw,34px)}header .sub{font-size:12px;line-height:1.3;text-align:right;opacity:.96}
+header h1{margin:0;font-size:clamp(20px,2.6vw,34px)}
+.headerLeft{display:flex;align-items:center;gap:10px;min-width:0}
+.hubbtn{flex:0 0 auto;border:0;background:#fff;color:var(--green2);border-radius:11px;padding:8px 11px;font-weight:900;font-size:13px;box-shadow:0 2px 0 #0002}
+.hubbtn:active{transform:translateY(1px)}
+header .sub{font-size:12px;line-height:1.3;text-align:right;opacity:.96}
 main{flex:1;min-height:0;display:flex;flex-direction:column;padding:10px}.screen{display:none;height:100%;min-height:0}.screen.active{display:flex}.card{border:2px solid #d7eee4;border-radius:20px;background:#fff;box-shadow:0 8px 18px #277d5c12}.hidden{display:none!important}
 
 #home{gap:10px}.homeGrid{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:10px}.intro,.preview{padding:16px;overflow:hidden}.intro h2{margin:0 0 8px;color:var(--green2);font-size:clamp(28px,4vw,50px);line-height:1.02}.intro p,.preview p{margin:6px 0;font-size:clamp(14px,1.55vw,20px);line-height:1.35}.pickTitle{font-weight:900;font-size:clamp(18px,2vw,24px);color:var(--green2);margin:10px 0 6px}.levelRow,.modeRow{display:grid;gap:8px}.levelRow{grid-template-columns:repeat(3,minmax(0,1fr))}.modeRow{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:4px}.pickBtn,.modeBtn{min-width:0;border:3px solid #c9e7d9;background:#fbfffd;color:var(--ink);border-radius:16px;padding:10px 8px;font-weight:900;font-size:clamp(15px,1.6vw,20px);line-height:1.15;white-space:normal}.pickBtn small,.modeBtn small{font-size:.72em;font-weight:700;opacity:.82}.pickBtn.active{background:#e9f8f1;border-color:var(--green);color:var(--green2)}.modeBtn.one{background:var(--p1);border-color:#2774c1;color:#fff}.modeBtn.two{background:linear-gradient(90deg,var(--p1) 50%,var(--p2) 50%);border-color:#9d8879;color:#fff}.note{font-size:12px;color:#527366;text-align:center;margin-top:7px;line-height:1.3}
@@ -30,14 +34,14 @@ main{flex:1;min-height:0;display:flex;flex-direction:column;padding:10px}.screen
 
 @media(max-width:900px){.homeGrid{grid-template-columns:1fr}.preview{display:none}.gameGrid{grid-template-rows:minmax(170px,34%) minmax(0,66%)}}
 @media(max-width:700px){body{padding:0}.app{height:100vh;border:0;border-radius:0;box-shadow:none}header{padding:8px 10px}main{padding:7px}.statusline{grid-template-columns:minmax(0,1fr) 70px minmax(0,1fr);gap:5px}.score{padding:7px 5px;font-size:12px}.round{font-size:12px}.gameGrid{grid-template-rows:minmax(145px,31%) minmax(0,69%);gap:6px}.thrower{width:78px;height:95px;left:2%;bottom:32px}.runway{height:34px}.landingPin{bottom:38px}.fieldStatus{font-size:11px;padding:4px 7px}.qcard{padding:8px}.worksheet{padding:7px 9px}.choices{gap:6px}.choiceBtn{min-height:47px;padding:6px;font-size:clamp(15px,4vw,20px)}.blank{height:39px;width:68px}.intro{padding:12px}.levelRow{gap:5px}.pickBtn{padding:8px 4px;font-size:13px}}
-@media(max-width:430px) and (orientation:portrait){header .sub{display:none}.intro h2{font-size:34px}.modeBtn{font-size:16px}.gameGrid{grid-template-rows:minmax(128px,29%) minmax(0,71%)}.fieldStatus{top:4px}.thrower{width:62px;height:82px}.javelin{width:74px}.landingPin .flag{font-size:21px}.landingPin .distance{font-size:10px}.markers .mark span{font-size:9px}.choices{grid-template-columns:1fr}.choiceBtn{min-height:41px}.topBadges{gap:5px}.tag,.turnBanner,.timerBadge{font-size:11px;padding:4px 7px}#questionTitle{font-size:16px;margin:4px 0}.mainline{font-size:21px}.step{font-size:18px;margin:4px 0}.feedback{font-size:13px;min-height:18px}.explain{font-size:11px;min-height:24px}.actionBtn{font-size:14px;padding:7px 13px}}
+@media(max-width:430px) and (orientation:portrait){header .sub{display:none}.headerLeft{gap:6px}.hubbtn{padding:6px 7px;font-size:10px}header h1{font-size:18px}.intro h2{font-size:34px}.modeBtn{font-size:16px}.gameGrid{grid-template-rows:minmax(128px,29%) minmax(0,71%)}.fieldStatus{top:4px}.thrower{width:62px;height:82px}.javelin{width:74px}.landingPin .flag{font-size:21px}.landingPin .distance{font-size:10px}.markers .mark span{font-size:9px}.choices{grid-template-columns:1fr}.choiceBtn{min-height:41px}.topBadges{gap:5px}.tag,.turnBanner,.timerBadge{font-size:11px;padding:4px 7px}#questionTitle{font-size:16px;margin:4px 0}.mainline{font-size:21px}.step{font-size:18px;margin:4px 0}.feedback{font-size:13px;min-height:18px}.explain{font-size:11px;min-height:24px}.actionBtn{font-size:14px;padding:7px 13px}}
 @media(max-height:600px) and (orientation:landscape){body{padding:0}.app{height:100vh;border:0;border-radius:0}header{padding:5px 10px}header h1{font-size:19px}header .sub{font-size:9px}main{padding:5px}.topControls{gap:4px}.smallbtn{padding:5px 8px;font-size:11px}.statusline{gap:4px}.score{padding:4px 7px;font-size:11px}.round{font-size:11px}.progress{height:4px}.gameGrid{grid-template-rows:minmax(95px,30%) minmax(0,70%);gap:4px}.runway{height:24px}.thrower{width:55px;height:65px;bottom:20px}.landingPin{bottom:27px}.landingPin .flag{font-size:19px}.fieldStatus{font-size:9px;padding:2px 6px}.qcard{padding:5px}.topBadges{gap:4px}.tag,.turnBanner,.timerBadge{font-size:10px;padding:3px 6px}#questionTitle{font-size:14px;margin:3px 0}.worksheet{padding:5px}.mainline{font-size:18px;margin:2px 0 5px}.step{font-size:16px;margin:3px 0}.blank{height:32px;width:62px;font-size:17px}.choices{gap:4px;margin-top:4px}.choiceBtn{min-height:34px;font-size:13px;padding:3px}.inputArea{margin-top:4px}.actionBtn{font-size:12px;padding:5px 10px}.feedback{font-size:11px;min-height:16px;margin-top:3px}.explain{font-size:10px;min-height:17px}}
 </style>
 <script src="https://cdn.counter.dev/script.js" data-id="825e93b6-ce99-40ef-8bcc-125f13297433" data-utcoffset="8"></script>
 </head>
 <body>
 <div class="app">
-<header><h1>🏹 Javelin Throw – Length Conversion</h1><div class="sub">Sports Fiesta • Convert m, cm and km<br>Correct answers send the javelin farther</div></header>
+<header><div class="headerLeft"><button class="hubbtn" type="button" onclick="goFiestaHub()">← Fiesta Hub</button><h1>🏹 Javelin Throw – Length Conversion</h1></div><div class="sub">Sports Fiesta • Convert m, cm and km<br>Correct answers send the javelin farther</div></header>
 <main>
 <section id="home" class="screen active"><div class="homeGrid">
   <div class="card intro">
@@ -89,6 +93,8 @@ main{flex:1;min-height:0;display:flex;flex-direction:column;padding:10px}.screen
 </main></div>
 <script>
 const MAX_TURNS=12,HARD_TIME=12,MAX_DISTANCE=60;
+const HUB_URL="https://limkimsze-maker.github.io/P3-Length-Mass-and-Volume-Sports-Fiesta-/";
+const HUB_KEY="sportsFiestaHubProgress_v1";
 let mode=1,difficulty="easy",round=0,currentPlayer=0,currentQuestion=null,questions=[],resolved=false,timer=null,timeLeft=HARD_TIME,soundOn=true,audioCtx=null,distances=[0,0],correctCounts=[0,0];
 function athleteSVG(colour="#2f87df"){return `<svg viewBox="0 0 90 120" aria-hidden="true"><circle cx="48" cy="16" r="10" fill="#ffd5b5" stroke="#704d37" stroke-width="2"/><path d="M43 29 L34 60 L52 65 L60 35 Z" fill="${colour}" stroke="#16362b" stroke-width="3"/><path d="M38 38 L19 29" stroke="#ffd5b5" stroke-width="8" stroke-linecap="round"/><path d="M57 38 L76 28" stroke="#ffd5b5" stroke-width="8" stroke-linecap="round"/><path d="M39 61 L25 93" stroke="#17352b" stroke-width="9" stroke-linecap="round"/><path d="M50 64 L68 91" stroke="#17352b" stroke-width="9" stroke-linecap="round"/><path d="M16 98 L29 98" stroke="#253d35" stroke-width="6" stroke-linecap="round"/><path d="M65 94 L79 98" stroke="#253d35" stroke-width="6" stroke-linecap="round"/></svg>`}
 function initAudio(){if(audioCtx)return;const Ctx=window.AudioContext||window.webkitAudioContext;if(Ctx)audioCtx=new Ctx()}
@@ -97,7 +103,34 @@ function playCorrect(){beep(660,.08,"triangle",.045,0);beep(880,.11,"triangle",.
 function toggleSound(){soundOn=!soundOn;document.getElementById("soundBtn").textContent=soundOn?"🔊 Sound On":"🔇 Sound Off";if(soundOn)playCorrect()}
 function show(id){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active")}function shuffle(a){return [...a].sort(()=>Math.random()-.5)}function pick(a){return a[Math.floor(Math.random()*a.length)]}function sleep(ms){return new Promise(r=>setTimeout(r,ms))}function capitalize(s){return s.charAt(0).toUpperCase()+s.slice(1)}
 function setDifficulty(level){difficulty=level;["Easy","Intermediate","Hard"].forEach(n=>document.getElementById("btn"+n).classList.remove("active"));document.getElementById("btn"+capitalize(level)).classList.add("active")}
-function goHome(){stopTimer();show("home")}function startGame(m){mode=m;initAudio();if(audioCtx&&audioCtx.state==="suspended")audioCtx.resume();restart()}
+function goHome(){stopTimer();show("home")}
+function goFiestaHub(){stopTimer();window.location.href=HUB_URL}
+function saveHubProgress(){
+  try{
+    let data={};
+    try{data=JSON.parse(localStorage.getItem(HUB_KEY)||"{}")||{}}catch(_){data={}}
+    const old=data[2]||{};
+    const perfect=mode===1&&correctCounts[0]===MAX_TURNS;
+    let winner=1;
+    if(mode===2){
+      winner=distances[0]===distances[1]?0:(distances[0]>distances[1]?1:2);
+    }
+    data[2]={
+      ...old,
+      completed:true,
+      pieceEarned:!!old.pieceEarned||mode===1,
+      perfectSingle:!!old.perfectSingle||perfect,
+      verified:true,
+      source:"game-v5",
+      updatedAt:new Date().toISOString(),
+      lastMode:mode,
+      lastWinner:winner
+    };
+    localStorage.setItem(HUB_KEY,JSON.stringify(data));
+  }catch(err){
+    console.warn("Could not save Sports Fiesta progress.",err);
+  }
+}function startGame(m){mode=m;initAudio();if(audioCtx&&audioCtx.state==="suspended")audioCtx.resume();restart()}
 function restart(){stopTimer();round=0;currentPlayer=0;distances=[0,0];correctCounts=[0,0];questions=buildQuestions(MAX_TURNS);document.getElementById("pin2").classList.toggle("hidden",mode!==2);document.getElementById("score2").style.visibility=mode===2?"visible":"hidden";show("game");updateField();renderQuestion()}
 function makeInput(id,wide=false,label="answer"){return `<input id="${id}" class="blank ${wide?'wide':''}" data-answer-field="${id}" inputmode="numeric" autocomplete="off" aria-label="${label}">`}
 function getInputs(){if(!currentQuestion||!Array.isArray(currentQuestion.fields))return[];return currentQuestion.fields.map(id=>document.getElementById(id)).filter(Boolean)}
@@ -129,12 +162,8 @@ function animateThrow(player,distance){return new Promise(resolve=>{const jav=do
 function updateScoreText(){document.getElementById("score1").textContent=`${mode===1?"Your":"Player 1"} Distance: ${distances[0]} m`;document.getElementById("score2").textContent=`Player 2 Distance: ${distances[1]} m`}
 function updateField(){const pos=d=>18+79*(d/MAX_DISTANCE);document.getElementById("pin1").style.left=`${pos(distances[0])}%`;document.getElementById("pin2").style.left=`${pos(distances[1])}%`;document.getElementById("distance1").textContent=`${distances[0]} m`;document.getElementById("distance2").textContent=`${distances[1]} m`}
 function nextTurn(){stopTimer();if(round>=MAX_TURNS-1){finishGame();return}round++;if(mode===2)currentPlayer=currentPlayer===0?1:0;renderQuestion()}
-function finishGame(){stopTimer();document.getElementById("bar").style.width="100%";show("results");if(mode===1){const d=distances[0];document.getElementById("trophy").textContent=d>=50?"🏆":d>=35?"🌟":"💪";document.getElementById("resultTitle").textContent=d>=50?"Javelin Champion!":d>=35?"Strong Throwing!":"Keep Practising!";document.getElementById("resultText").innerHTML=`Final distance: <b>${d} m</b><br>Correct conversions: <b>${correctCounts[0]} / ${MAX_TURNS}</b><br><br>${d>=50?"Excellent conversion accuracy!":d>=35?"Good work — try to reach 60 m next time.":"Another round will help build speed and accuracy."}`}else{const a=distances[0],b=distances[1];let title="It's a Draw!";if(a>b)title="Player 1 Wins the Javelin!";if(b>a)title="Player 2 Wins the Javelin!";document.getElementById("trophy").textContent=a===b?"🤝":"🏆";document.getElementById("resultTitle").textContent=title;document.getElementById("resultText").innerHTML=`Player 1: <b>${a} m</b> (${correctCounts[0]} correct)<br>Player 2: <b>${b} m</b> (${correctCounts[1]} correct)<br><br>The furthest javelin wins.`}playWin()}
+function finishGame(){stopTimer();document.getElementById("bar").style.width="100%";show("results");if(mode===1){const d=distances[0];document.getElementById("trophy").textContent=d>=50?"🏆":d>=35?"🌟":"💪";document.getElementById("resultTitle").textContent=d>=50?"Javelin Champion!":d>=35?"Strong Throwing!":"Keep Practising!";document.getElementById("resultText").innerHTML=`Final distance: <b>${d} m</b><br>Correct conversions: <b>${correctCounts[0]} / ${MAX_TURNS}</b><br><br>${d>=50?"Excellent conversion accuracy!":d>=35?"Good work — try to reach 60 m next time.":"Another round will help build speed and accuracy."}`}else{const a=distances[0],b=distances[1];let title="It's a Draw!";if(a>b)title="Player 1 Wins the Javelin!";if(b>a)title="Player 2 Wins the Javelin!";document.getElementById("trophy").textContent=a===b?"🤝":"🏆";document.getElementById("resultTitle").textContent=title;document.getElementById("resultText").innerHTML=`Player 1: <b>${a} m</b> (${correctCounts[0]} correct)<br>Player 2: <b>${b} m</b> (${correctCounts[1]} correct)<br><br>The furthest javelin wins.`}saveHubProgress();playWin()}
 document.getElementById("miniPerson").innerHTML=athleteSVG("#2f87df");document.getElementById("thrower").innerHTML=athleteSVG("#2f87df");updateField();
 </script>
-<script src="https://limkimsze-maker.github.io/P3-Length-Mass-and-Volume-Sports-Fiesta-/sports-fiesta-original-questions-v1.js?v=20260810a" data-practice="2"></script>
-<script src="https://limkimsze-maker.github.io/P3-Length-Mass-and-Volume-Sports-Fiesta-/sports-fiesta-back-to-hub-v1.js?v=20260812a"></script>
-<script src="https://limkimsze-maker.github.io/P3-Length-Mass-and-Volume-Sports-Fiesta-/sports-fiesta-medal-hook-v4.js?v=20260810d" data-practice="2" data-sport="Javelin Throw"></script>
-<script src="https://limkimsze-maker.github.io/P3-Length-Mass-and-Volume-Sports-Fiesta-/sports-fiesta-next-guard-v1.js?v=20260812a" data-practice="2"></script>
 </body>
 </html>
